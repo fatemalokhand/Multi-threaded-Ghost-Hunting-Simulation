@@ -3,147 +3,161 @@
 
 void *ghostThread(void *args)
 {
-  srand(time(NULL));// Initialize a random seed for the random number generators
+  // Initialize a random seed for the random number generators
+  srand(time(NULL));
 
-  GhostType *p_ghost = (GhostType*)args;
+  GhostType *ghost = (GhostType*)args;
   printf("ghost's Thread Started! \n");
 
   int i = 0;
-  while (p_ghost->boredom > 0 && p_ghost->busted != 1)
+  while(ghost->boredom > 0 && ghost->busted != 1)
   {
-    sem_wait(p_ghost->p_currentRoom->mutex);
-    ghostAction(p_ghost, (unsigned int) i);
-    sem_post(p_ghost->p_currentRoom->mutex);
+    sem_wait(ghost->currentRoom->mutex);
+    ghostAction(ghost, (unsigned int) i);
+    sem_post(ghost->currentRoom->mutex);
     i++;
   }
-  
 }
 
 void *hunterThread(void *args)
 {
-    HunterType *p_hunter = (HunterType*)args;
-    printf("%s's Thread Started! \n", p_hunter->name);
+    HunterType *hunter = (HunterType*)args;
+    printf("%s's Thread Started! \n", hunter->name);
 
-    while (p_hunter->boredom > 0 && p_hunter->fear < MAX_FEAR && p_hunter->ghostlyEvidenceCount < 3)
+    while(hunter->boredom > 0 && hunter->fear < MAX_FEAR && hunter->ghostlyEvidenceCount < 3)
     {
-      hunterAction(p_hunter);
+      hunterAction(hunter);
     }
-    
 }
-
 
 int main(int argc, char *argv[])
 {
     // Initialize a random seed for the random number generators
     srand(time(NULL));
 
-    // You may change this code; this is for demonstration purposes
+    // initializing the building and populating the rooms
     BuildingType building;
     initBuilding(&building);
     populateRooms(&building);
 
-    
-    char hunterName1[MAX_STR];
-    char hunterName2[MAX_STR];
-    char hunterName3[MAX_STR];
-    char hunterName4[MAX_STR];
+    // variables to store the hunter's names
+    char hunter1Name[MAX_STR];
+    char hunter2Name[MAX_STR];
+    char hunter3Name[MAX_STR];
+    char hunter4Name[MAX_STR];
 
-    getNames(hunterName1, hunterName2,hunterName3,hunterName4);
+    getNames(hunter1Name, hunter2Name,hunter3Name,hunter4Name);
     printf("\n");
 
+    // creating the ghost and the 4 hunters
+    GhostType*  ghost =    calloc(1, sizeof(GhostType));
+    HunterType* hunter01 = calloc(1, sizeof(HunterType));
+    HunterType* hunter02 = calloc(1, sizeof(HunterType));
+    HunterType* hunter03 = calloc(1, sizeof(HunterType));
+    HunterType* hunter04 = calloc(1, sizeof(HunterType));
 
-    GhostType *  p_ghost =    calloc(1, sizeof(GhostType));
-    HunterType * p_hunter01 = calloc(1, sizeof(HunterType));
-    HunterType * p_hunter02 = calloc(1, sizeof(HunterType));
-    HunterType * p_hunter03 = calloc(1, sizeof(HunterType));
-    HunterType * p_hunter04 = calloc(1, sizeof(HunterType));
-
-    initGhost(p_ghost, getRandomStartingRoom(time(NULL), &building),time(NULL));//make room and ghostType Random;
+    // initializing the ghost
+    initGhost(ghost, getRandomStartingRoom(time(NULL), &building),time(NULL));
 
     printf("ghost initalized, here's the ghost info:\n");
-    printGhost(p_ghost);
-    printf("\n");
-    initHunter(p_hunter01, hunterName1, "Hu1", building.rooms.p_headNode->room, EMF,0,time(0), p_ghost);
-    initHunter(p_hunter02, hunterName2, "Hu2", building.rooms.p_headNode->room, TEMPERATURE,1, time(0), p_ghost);
-    initHunter(p_hunter03, hunterName3, "Hu3", building.rooms.p_headNode->room, FINGERPRINTS,2,time(0), p_ghost);
-    initHunter(p_hunter04, hunterName4, "Hu4", building.rooms.p_headNode->room, SOUND,3,time(0),p_ghost);
-    printf("hunters initalized: \n");
-    printHunter(p_hunter01);
-    printf("\n");
-    printHunter(p_hunter02);
-    printf("\n");
-    printHunter(p_hunter03);
-    printf("\n");
-    printHunter(p_hunter04);
+    printGhost(ghost);
     printf("\n");
     
+    // initializing the hunters
+    initHunter(hunter01, hunter1Name, "Hunter 1", building.rooms.headNode->room, EMF,0,time(0), ghost);
+    initHunter(hunter02, hunter2Name, "Hunter 2", building.rooms.headNode->room, TEMPERATURE,1, time(0), ghost);
+    initHunter(hunter03, hunter3Name, "Hunter 3", building.rooms.headNode->room, FINGERPRINTS,2,time(0), ghost);
+    initHunter(hunter04, hunter4Name, "Hunter 4", building.rooms.headNode->room, SOUND,3,time(0),ghost);
+    
+    printf("hunters initalized: \n");
+    
+    // printing out the hunters
+    printHunter(hunter01);
+    printf("\n");
+    printHunter(hunter02);
+    printf("\n");
+    printHunter(hunter03);
+    printf("\n");
+    printHunter(hunter04);
+    printf("\n");
+    
+    // array to hold the 5 threads
     pthread_t threads[5];
 
-    pthread_create(&threads[0], NULL, ghostThread,  p_ghost);
-    pthread_create(&threads[1], NULL, hunterThread, p_hunter01);
-    pthread_create(&threads[2], NULL, hunterThread, p_hunter02);
-    pthread_create(&threads[3], NULL, hunterThread, p_hunter03);
-    pthread_create(&threads[4], NULL, hunterThread, p_hunter04);
+    // creating the threads
+    pthread_create(&threads[0], NULL, ghostThread,  ghost);
+    pthread_create(&threads[1], NULL, hunterThread, hunter01);
+    pthread_create(&threads[2], NULL, hunterThread, hunter02);
+    pthread_create(&threads[3], NULL, hunterThread, hunter03);
+    pthread_create(&threads[4], NULL, hunterThread, hunter04);
 
-    for (int i = 0; i < 5; i++)
+    for(int i=0; i<5; i++)
     {
+      // joining the threads
       pthread_join(threads[i], NULL);
     }
 
-
+    // printing out the building
     printBuilding(&building);
     
+    // printing out the game summary
     printf("GAME SUMMARY:\n");
     printf("\n");
-    printGhost(p_ghost);
-    printf("busted: %d\n", p_ghost->busted);
+    printGhost(ghost);
+    printf("busted: %d\n", ghost->busted);
     printf("\n");
-    printf("%s fear and boredom is %d %d\n",p_hunter01->name, p_hunter01->fear, p_hunter01->boredom);
+    printf("%s fear and boredom is %d %d\n",hunter01->name, hunter01->fear, hunter01->boredom);
     printf("Evidence collected: \n");
-    printEvidenceList(&(p_hunter01->evidenceList));
+    printEvidenceList(&(hunter01->evidenceList));
     printf("\n");
-    printf("%s fear and boredom is %d %d\n",p_hunter02->name, p_hunter02->fear, p_hunter02->boredom);
+    printf("%s fear and boredom is %d %d\n",hunter02->name, hunter02->fear, hunter02->boredom);
     printf("Evidence collected: \n");
-    printEvidenceList(&(p_hunter02->evidenceList));
+    printEvidenceList(&(hunter02->evidenceList));
     printf("\n");
-    printf("%s fear and boredom is %d %d\n", p_hunter03->name,p_hunter03->fear, p_hunter03->boredom);
+    printf("%s fear and boredom is %d %d\n", hunter03->name, hunter03->fear, hunter03->boredom);
     printf("Evidence collected: \n");
-    printEvidenceList(&(p_hunter03->evidenceList));
+    printEvidenceList(&(hunter03->evidenceList));
     printf("\n");
-    printf("%s fear and boredom is %d %d\n", p_hunter04->name,p_hunter04->fear, p_hunter04->boredom);
+    printf("%s fear and boredom is %d %d\n", hunter04->name, hunter04->fear, hunter04->boredom);
     printf("Evidence collected: \n");
-    printEvidenceList(&(p_hunter04->evidenceList));
+    printEvidenceList(&(hunter04->evidenceList));
 
-    
-    free(p_ghost);
-    free(p_hunter01);
-    free(p_hunter02);
-    free(p_hunter03);
-    free(p_hunter04);
+    // freeing all the pointers
+    free(ghost);
+    free(hunter01);
+    free(hunter02);
+    free(hunter03);
+    free(hunter04);
 
     return 0;
 }
 
+// function to get the names of the 4 hunters
 void getNames(char* h1, char* h2, char* h3, char* h4){
 
-    printf("Enter hunter one name: ");
+    // getting the name of hunter 1
+    printf("Enter hunter 1 name: ");
     fgets(h1, MAX_STR, stdin);
     trim(h1);
 
-    printf("Enter hunter two name: ");
+    // getting the name of hunter 2
+    printf("Enter hunter 2 name: ");
     fgets(h2, MAX_STR, stdin);
     trim(h2);
 
-    printf("Enter hunter three name: ");
+    // getting the name of hunter 3
+    printf("Enter hunter 3 name: ");
     fgets(h3, MAX_STR, stdin);
     trim(h3);
 
-    printf("Enter hunter four name: ");
+    // getting the name of hunter 4
+    printf("Enter hunter 4 name: ");
     fgets(h4, MAX_STR, stdin);
     trim(h4);
     printf("hunter names are %s %s %s %s\n", h1, h2, h3, h4);
 }
 
+// helper function
 void trim(char* name){
 
   int i = strlen(name)-1;
@@ -152,15 +166,12 @@ void trim(char* name){
   {
     if(name[i] == ' ' || name[i] == '\n' || name[i] == '\t'){
       i--;
-
-    }else break;
+    }
+    else break;
   }
 
   name[i+1] = '\0';
-
 }
-
-
 
 /*
   Function:  randInt
