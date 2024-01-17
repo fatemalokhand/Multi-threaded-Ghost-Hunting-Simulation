@@ -1,72 +1,70 @@
 #include "defs.h"
 
 /*Function: initGhost()
-  Purpose:  initGhost
-       in:  GhostType * p_ghostType, RoomType * p_startRoom, unsigned int seed
+  Purpose:  initiliazes the ghost
+       in:  GhostType* ghostType, RoomType* startRoom, unsigned int seed
 */
-void initGhost(GhostType * p_ghostType, RoomType * p_startRoom, unsigned int seed)
+void initGhost(GhostType* ghostType, RoomType* startRoom, unsigned int seed)
 {
-  p_ghostType->p_currentRoom = p_startRoom;
-  p_ghostType->p_currentRoom->p_ghost = p_ghostType;
+  ghostType->currentRoom = startRoom;
+  ghostType->currentRoom->ghost = ghostType;
   int random = randInt(0,3);
-  switch (random)
+  switch(random)
   {
     case 0:
-      p_ghostType->class = 0;
+      ghostType->class = 0;
       break;
     
     case 1:
-      p_ghostType->class = 1;
+      ghostType->class = 1;
       break;
 
     case 2:
-      p_ghostType->class = 2;
+      ghostType->class = 2;
       break;
 
     case 3:
-      p_ghostType->class = 3;
+      ghostType->class = 3;
       break;
   }
-  p_ghostType->boredom = BOREDOM_MAX;
-  p_ghostType->seed = seed;
+  ghostType->boredom = BOREDOM;
+  ghostType->seed = seed;
 }
 
 
 /*Function: moveGhost()
-  Purpose:  moveGhost to other room
-       in:  GhostType * p_ghostType
+  Purpose:  moves the Ghost to other room
+       in:  GhostType* ghostType
 */
-void moveGhost(GhostType * p_ghostType)
+void moveGhost(GhostType* ghostType)
 {
-  p_ghostType->p_currentRoom->p_ghost = NULL;//tell the ghosts current room we are leaving
+  // the room that the ghost left from
+  ghostType->currentRoom->ghost = NULL;
 
+  // printing out the ghost's movement
+  printf("Ghost Movement: %s ~~~~>", ghostType->currentRoom->name);
 
-  printf("GhostMovment: %s ~~~~>", p_ghostType->p_currentRoom->name);
+ 
+  getNewRoom(&(ghostType->currentRoom));
+  printf(" %s \n", ghostType->currentRoom->name);
 
-  //drop evidence
-
-
-  getNewRoom(&(p_ghostType->p_currentRoom));
-
-
-  printf(" %s \n", p_ghostType->p_currentRoom->name);
-
-
-  p_ghostType->p_currentRoom->p_ghost = p_ghostType;//tell the ghosts new room we are now here
+  // the new room that the ghost is now in
+  ghostType->currentRoom->ghost = ghostType;
 }
 
 /*Function: printGhost()
-  Purpose:  printGhost
-       in:  GhostType * p_ghostType
+  Purpose:  printing out the ghost
+       in:  GhostType* ghostType
 */
-void printGhost(GhostType * p_ghostType)
+void printGhost(GhostType* ghostType)
 {
 
   //ghostEnumTypeString code
   char ghostClassTypeString[MAX_STR];
   strcpy(ghostClassTypeString, "");
-  switch (p_ghostType->class)
+  switch(ghostType->class)
   {
+      // getting the type of the ghost as a string
       case 0:
           strcpy(ghostClassTypeString, "POLTERGEIST");
        break;
@@ -81,85 +79,85 @@ void printGhost(GhostType * p_ghostType)
         break;
   }
 
-  printf("Ghost(Room:%s, Class:%s, Boredom:%d)\n", p_ghostType->p_currentRoom->name, ghostClassTypeString, p_ghostType->boredom);
+  // printing out the details of the ghost
+  printf("Ghost (Room:%s, Class:%s, Boredom:%d)\n", ghostType->currentRoom->name, ghostClassTypeString, ghostType->boredom);
 }
 
 /*Function: ghostAction()
-  Purpose:  randomly choose with ghost action
-       in:  GhostType * p_ghostType, unsigned int seed
+  Purpose:  randomly choose an action for the ghost to perform
+       in:  GhostType* ghostType, unsigned int seed
 */
-void ghostAction(GhostType * p_ghostType, unsigned int seed){
-  //srand(seed);
-  int hunterIn = 0;
+void ghostAction(GhostType* ghostType, unsigned int seed){
+  int hunterInRoom = 0;
   int random;
-
-    if(hunterIn == 0){
+    
+    // checking if the hunter is in the room
+    if(hunterInRoom == 0){
 
       random = randInt(0,3);
 
-      switch (random){
-        //move to next room
+      switch(random){
+        // move to a connected room
         case 0:
-          moveGhost(p_ghostType);
-          //printGhost(p_ghostType);
+          moveGhost(ghostType);
           break;
-        //leave evidence
+        // leave behind evidence
         case 1:
-          //printf("seed is %d\n", seed);
-          printf("ghost dropped evidence\n");
-          EvidenceType *p_testEvidence = calloc(1, sizeof(EvidenceType));
-          initEvidence(p_testEvidence, randInt(0,3));
-          appendEvidence(&(p_ghostType->p_currentRoom->evidenceList),p_testEvidence);
-          printEvidenceList(&(p_ghostType->p_currentRoom->evidenceList));
+          EvidenceType *evidence = calloc(1, sizeof(EvidenceType));
+          initEvidence(evidence, randInt(0,3));
+          addEvidence(&(ghostType->currentRoom->evidenceList), evidence);
+          printEvidenceList(&(ghostType->currentRoom->evidenceList));
           break;
         default:
-          printf("ghost decide to take no action\n");
+          printf("ghost decided to take no action\n");
           break;
       }
-
-      p_ghostType->boredom--;
-    }else{
-      //if yes hunter ghost leave evidence/take no action
+      
+      // decreasing the ghost's boredom
+      ghostType->boredom--;
+      
+    }
+    else{
       random = rand() % (3 - 0) + 0;
-      //random = roundf(seed*1);
 
-      switch (random)
+      switch(random)
       {
+      // leaving behind evidence
       case 0:
-        EvidenceType *p_testEvidence = calloc(1, sizeof(EvidenceType));
-        initEvidence(p_testEvidence, randInt(0,3));
-        appendEvidence(&(p_ghostType->p_currentRoom->evidenceList),p_testEvidence);
-        printEvidenceList(&(p_ghostType->p_currentRoom->evidenceList));
+        EvidenceType *evidence = calloc(1, sizeof(EvidenceType));
+        initEvidence(evidence, randInt(0,3));
+        addEvidence(&(ghostType->currentRoom->evidenceList), evidence);
+        printEvidenceList(&(ghostType->currentRoom->evidenceList));
         break;
-
       default:
-        printf("ghost decide to take no action\n");
+        printf("ghost decided to take no action\n");
         break;
       }
 
-      p_ghostType->boredom = BOREDOM_MAX;
+      // updating the ghost's boredom
+      ghostType->boredom = BOREDOM;
     }
 
 }
 
 /*Function: getRandomStartingRoom()
-  Purpose:  generate random starting room
-       in:  unsigned int seed, BuildingType *p_buildingType
+  Purpose:  generating random starting room for the ghost
+       in:  unsigned int seed, BuildingType *building
 */
-RoomType * getRandomStartingRoom(unsigned int seed, BuildingType *p_buildingType)
+RoomType* getRandomStartingRoom(unsigned int seed, BuildingType *building)
 {
   srand(seed);
   int newRoomInt = (rand() % 12) + 1;
 
-  RoomNodeType *p_thisRoomNode;
-  p_thisRoomNode = p_buildingType->rooms.p_headNode;
+  RoomNodeType *thisRoomNode;
+  thisRoomNode = building->rooms.headNode;
 
-  for(int i = 0; i < newRoomInt; i++)
+  for(int i=0; i<newRoomInt; i++)
   {
-    p_thisRoomNode = p_thisRoomNode->p_nextNode;
+    thisRoomNode = thisRoomNode->nextNode;
   }
 
-  return p_thisRoomNode->room;
+  return thisRoomNode->room;
 }
 
 GhostClassType randomGhost(){
