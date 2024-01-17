@@ -1,97 +1,85 @@
 #include "defs.h"
 
 /*Function: initRoomList()
-  Purpose:  initRoomList
-       in:  RoomListType *p_roomListType
+  Purpose:  initializes the RoomList
+       in:  RoomListType* roomListType
 */
-void initRoomList(RoomListType *p_roomListType)
+void initRoomList(RoomListType *roomListType)
 {
-  //might need to allocate for the two nodes
-  p_roomListType->p_headNode = NULL;
-  p_roomListType->p_tailNode = NULL;
+  roomListType->headNode = NULL;
+  roomListType->tailNode = NULL;
 
 }
 
-/*Function: appendRoom()
-  Purpose:  append Room
-  in:  RoomListType *p_roomListType, RoomNodeType *p_roomToAppend
+/*Function: addRoom()
+  Purpose:  adds the Room into the room list
+  in:  RoomListType *roomListType, RoomNodeType *roomToAppend
 */
-void appendRoom(RoomListType *p_roomListType, RoomNodeType *p_roomToAppend)
+void addRoom(RoomListType *roomListType, RoomNodeType *roomToAppend)
 {
-  if((p_roomListType->p_headNode == NULL) && (p_roomListType->p_tailNode == NULL))
+  if((roomListType->headNode == NULL) && (roomListType->tailNode == NULL))
   {
-    p_roomListType->p_headNode = p_roomToAppend;
-    p_roomListType->p_tailNode = p_roomToAppend;
+    roomListType->headNode = roomToAppend;
+    roomListType->tailNode = roomToAppend;
   }
   else
   {
-    RoomNodeType *p_thisNode;
-    p_thisNode = p_roomListType->p_headNode;
+    RoomNodeType *thisNode;
+    thisNode = roomListType->headNode;
 
-    while (p_thisNode->p_nextNode != NULL)
+    while(thisNode->nextNode != NULL)
     {
-       p_thisNode = p_thisNode->p_nextNode;
+       thisNode = thisNode->nextNode;
     }
 
-    p_thisNode->p_nextNode = p_roomToAppend;
-    p_roomListType->p_tailNode = p_roomToAppend;
+    thisNode->nextNode = roomToAppend;
+    roomListType->tailNode = roomToAppend;
   }
 }
 
 
-
 /*Function: initRoom()
-  Purpose:  initRoom
+  Purpose:  initializing the Room
   in:  RoomType* room, char* name
 */
 void initRoom(RoomType* room, char* name){
-    //sem_t mutex;
     room->mutex = malloc(sizeof(sem_t));
-    //room->mutex = &mutex;
     sem_init(room->mutex, 0, 1);
-
-
     strcpy((room)->name,name);
-    room->adjacentRooms.p_headNode == NULL;
+    room->adjacentRooms.headNode == NULL;
     room->adjacentRooms.size = 0;
-    room->p_ghost = NULL;
+    room->ghost = NULL;
     initEvidenceList(&(room->evidenceList));
 
-    for(int i = 0; i < 4; i++){
+    for(int i=0; i<4; i++){
       room->hunters[i] = NULL;
     }
 }
 
-/*Function: doseRoomContainGhost()
-  Purpose:  check if ghost is in the room
-  in:  RoomType *p_thisRoom
+/*Function: doesRoomContainGhost()
+  Purpose:  check if the ghost is in the room
+  in:  RoomType *thisRoom
 */
-int doseRoomContainGhost(RoomType *p_thisRoom)
+int doesRoomContainGhost(RoomType *thisRoom)
 {
-   return (p_thisRoom->p_ghost != NULL);
+   return (thisRoom->ghost != NULL);
 }
 
 /*Function: printRoom(()
-  Purpose:  print all rooms and what its connected to
+  Purpose:  prints out all the rooms and what rooms they are connected to
   in:  room pinter
 */
-void printRoom(RoomType *p_roomType)
+void printRoom(RoomType *roomType)
 {
-  //printf("printRoom Start \n");
-
-
-  if(p_roomType == NULL)
+  if(roomType == NULL)
   {
     printf("[Room Is NULL]\n");
   }
   else
   {
-      printf("%s \n", p_roomType->name);
+      printf("%s \n", roomType->name);
 
-      ///////////////////////////////
-
-      //printf("Ghost[%d] \n", doseRoomContainGhost(p_roomType));
-      if(doseRoomContainGhost(p_roomType) == 1)
+      if(doesRoomContainGhost(roomType) == 1)
       {
         printf("[Boo] \n");
       }
@@ -100,122 +88,107 @@ void printRoom(RoomType *p_roomType)
         printf("[   ] \n");
       }
 
-
-      ///////////////////////////////
-
-      //printf("Hunters:\n");
-      for(int i = 0; i <= 3; i++)
+      for(int i=0; i<=3; i++)
       {
-        if(p_roomType->hunters[i] == NULL)
+        if(roomType->hunters[i] == NULL)
         {
           printf("[   ] \n");
         }
         else
         {
-          printf("[%s] \n", p_roomType->hunters[i]->nickName);
+          printf("[%s] \n", roomType->hunters[i]->nickName);
         }
       }
 
-      ///////////////////////////////
-
-      if(p_roomType->adjacentRooms.p_headNode == NULL)
+      if(roomType->adjacentRooms.headNode == NULL)
       {
         printf("     <<No-Adjacent-Rooms>>\n");
       }
       else
       {
-        printf("     adjacentRooms [%d]: \n", p_roomType->adjacentRooms.size);
+        printf("     adjacentRooms [%d]: \n", roomType->adjacentRooms.size);
 
-        RoomNodeType * p_thisNode;
-        p_thisNode = p_roomType->adjacentRooms.p_headNode;
-        while (p_thisNode->p_nextNode != NULL)
+        RoomNodeType* thisNode;
+        thisNode = roomType->adjacentRooms.headNode;
+        while(thisNode->nextNode != NULL)
         {
-           printf("%s --> %s \n",  p_roomType->name, p_thisNode->room->name);
-           p_thisNode = p_thisNode->p_nextNode;
+           printf("%s --> %s \n",  roomType->name, thisNode->room->name);
+           thisNode = thisNode->nextNode;
         }
-        printf("%s --> %s \n",  p_roomType->name, p_thisNode->room->name);
+        printf("%s --> %s \n",  roomType->name, thisNode->room->name);
       }
 
-      ///////////////////////////////
-
-      printEvidenceList(&(p_roomType->evidenceList));
+      printEvidenceList(&(roomType->evidenceList));
   }
 
-
-    printf("\n");
-    //printf("printRoom End \n");
+  printf("\n");
 }
 
 /*Function: connectOneRoom(()
-  Purpose:  connect one room to the other
-  in:  RoomType *p_thisRoom, RoomType *p_roonToConnect
+  Purpose:  connecting one room to the other room
+  in:  RoomType *thisRoom, RoomType *roomToConnect
 */
-void connectOneRoom(RoomType *p_thisRoom, RoomType *p_roonToConnect){
-  RoomNodeType* p_newNode;
-  p_newNode = malloc(sizeof(RoomNodeType));
-  p_newNode->room = p_roonToConnect;
-  p_newNode->p_nextNode = NULL;
+void connectOneRoom(RoomType *thisRoom, RoomType *roomToConnect){
+  RoomNodeType* newNode;
+  newNode = malloc(sizeof(RoomNodeType));
+  newNode->room = roomToConnect;
+  newNode->nextNode = NULL;
 
-  if(p_thisRoom->adjacentRooms.p_headNode == NULL)
+  if(thisRoom->adjacentRooms.headNode == NULL)
   {
-    p_thisRoom->adjacentRooms.p_headNode = p_newNode;
-    //p_thisRoom->size++;
+    thisRoom->adjacentRooms.headNode = newNode;
   }
   else
   {
-    RoomNodeType* p_current;
-    p_current = p_thisRoom->adjacentRooms.p_headNode;
+    RoomNodeType* current;
+    current = thisRoom->adjacentRooms.headNode;
 
-    while (p_current->p_nextNode != NULL)
+    while(current->nextNode != NULL)
     {
-       p_current = p_current->p_nextNode;
+       current = current->nextNode;
     }
 
-    p_current->p_nextNode = p_newNode;
-    //p_thisRoom->size++;
+    current->nextNode = newNode;
   }
-  p_thisRoom->adjacentRooms.size++;
+  thisRoom->adjacentRooms.size++;
 }
 
 /*Function: connectRooms(()
-  Purpose:  connect 2 rooms
-  in:  RoomType *p_roomA, RoomType *p_roomB
+  Purpose:  connecting 2 rooms together
+  in:  RoomType *roomA, RoomType *roomB
 */
-void connectRooms(RoomType *p_roomA, RoomType *p_roomB)
+void connectRooms(RoomType *roomA, RoomType *roomB)
 {
-  connectOneRoom(p_roomA, p_roomB);
-  connectOneRoom(p_roomB, p_roomA);
+  connectOneRoom(roomA, roomB);
+  connectOneRoom(roomB, roomA);
 }
 
 
 /*Function: getNewRoom()
-  Purpose:  move stuff to a new room
-  in:  RoomType ** pp_currentRoom
+  Purpose:  moving things to a new room
+  in:  RoomType ** currentRoom
 */
-void getNewRoom(RoomType ** pp_currentRoom){
-  int newRoomInt = (rand() % ((*pp_currentRoom)->adjacentRooms.size));//Note the range of newRoomInt is [0, pp_currentRoom->size]
-  RoomNodeType *p_thisNode;
-  p_thisNode = (*pp_currentRoom)->adjacentRooms.p_headNode;
+void getNewRoom(RoomType** currentRoom){
+  int newRoomInt = (rand() % ((*currentRoom)->adjacentRooms.size));
+  RoomNodeType *thisNode;
+  thisNode = (*currentRoom)->adjacentRooms.headNode;
 
-  for(int i = 0; i < newRoomInt; i++)
+  for(int i=0; i<newRoomInt; i++)
   {
-     //printf("line 136 called\n");
-     p_thisNode = p_thisNode->p_nextNode;
+     thisNode = thisNode->nextNode;
   }
 
-  *pp_currentRoom = p_thisNode->room;
-  
-
-  
+  *currentRoom = thisNode->room;
 }
 
-int getNumberOfHuntersInRoom(RoomType *p_roomType)
+// function to get the number of hunters in the room
+int getNumberOfHuntersInRoom(RoomType *roomType)
 {
   int numberOfHunters = 0;
 
-  for(int i = 0; i <= 3; i++)
+  for(int i=0; i<=3; i++)
   {
-      if(p_roomType->hunters[i] == NULL)
+      if(roomType->hunters[i] == NULL)
       {
           numberOfHunters++;
       }
