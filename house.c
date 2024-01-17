@@ -1,117 +1,130 @@
 #include "defs.h"
 
-/* 
-  Function: initHouse();
-  Purpose:  initializes the fields of a given HouseType
-  Params:   
-    Output: HouseType *house - the house who's fields are to be intitialized
+// function to print out the building
+void printBuilding(BuildingType *building){
 
-*/
-void initHouse(HouseType *house){
-
-    // initialize the rooms of the given house
-    initRoomList(&(house->rooms));
-
-}
-
-/* 
-  Function: cleanupHouse();
-  Purpose:  deallocates the dynamically allocated memory in the given house type
-  Params:   
-    Input/Output: HouseType *house - the house who's memory will be deallocated
-
-*/
-void cleanupHouse(HouseType *house){
-
-    // call functions to clean up all dynamically allocated elements of the building
-    cleanupRoomData(&(house->rooms));
-    cleanupRoomList(&(house->rooms));
-
-}
-
-/* 
-  Function: getRandomRoom();
-  Purpose:  generate a random room based off the parameter
-  Params:   
-    Input: NodeType *startingNode - the room in the house list where the room generation will begin from
-
-*/
-RoomType* getRandomRoom(NodeType *startingNode){
-
-    // create a variable to store the amount of rooms
-    int numRooms = 0;
-
-    // create variables to store the current node
-    NodeType *currentNode;
-
-    // set the current node to the head of the list
-    currentNode = startingNode;
-
-    // traverse through the list
-    while(currentNode != NULL){
-
-        // incriment the number of rooms by 1
-        numRooms++;
-
-        // set the current node to the next node
-        currentNode = currentNode->next;
-
+    // checking if the building is empty
+    if(buildingType->rooms.headNode == NULL && buildingType->rooms.tailNode == NULL){
+    	printf("building is null\n");
     }
+    else{
 
-    // create an array that is the size of the number of rooms
-    RoomType *houseRooms[numRooms];
-    int count = 0;
+      RoomNodeType* current;
+      current = buildingType->rooms.headNode;
+      
+      // printing out all the rooms in the building
+      while(current->nextNode != NULL){
+        printRoom(current->room);
+        current = current->nextNode;
+      }
 
-    // generate a random number
-    int randomNum = randInt(0, numRooms);
-
-    // set the current node to the starting node parameter
-    currentNode = startingNode;
-
-    // traverse through the list
-    while(currentNode != NULL){
-
-        // set the current element in the house rooms array to the current linked list element
-        houseRooms[count] = currentNode->data;
-        count++;
-
-        // set the current node to the next node
-        currentNode = currentNode->next;
-
+      printRoom(current->room);
     }
-
-    // return a random room from the house rooms array
-    return houseRooms[randomNum];
-
 }
 
+// function to populate the rooms
+void populateRooms(BuildingType* building) {
+    // Creating the rooms dynamically
+    building->ghost = NULL;
+    RoomType* van = calloc(1, sizeof(RoomType));
+    initRoom(van, "Van");
+    RoomType* hallway = calloc(1, sizeof(RoomType));
+    initRoom(hallway, "Hallway");
+    RoomType* master_bedroom = calloc(1, sizeof(RoomType));
+    initRoom(master_bedroom, "Master Bedroom");
+    RoomType* boys_bedroom = calloc(1, sizeof(RoomType));
+    initRoom(boys_bedroom, "Boy's Bedroom");
+    RoomType* bathroom = calloc(1, sizeof(RoomType));
+    initRoom(bathroom, "Bathroom");
+    RoomType* basement = calloc(1, sizeof(RoomType));
+    initRoom(basement, "Basement");
+    RoomType* basement_hallway = calloc(1, sizeof(RoomType));
+    initRoom(basement_hallway, "Basement Hallway");
+    RoomType* right_storage_room = calloc(1, sizeof(RoomType));
+    initRoom(right_storage_room, "Right Storage Room");
+    RoomType* left_storage_room = calloc(1, sizeof(RoomType));
+    initRoom(left_storage_room, "Left Storage Room");
+    RoomType* kitchen = calloc(1, sizeof(RoomType));
+    initRoom(kitchen, "Kitchen");
+    RoomType* living_room = calloc(1, sizeof(RoomType));
+    initRoom(living_room, "Living Room");
+    RoomType* garage = calloc(1, sizeof(RoomType));
+    initRoom(garage, "Garage");
+    RoomType* utility_room = calloc(1, sizeof(RoomType));
+    initRoom(utility_room, "Utility Room");
 
-/*
-    Dynamically allocates several rooms and populates the provided house.
-    Note: You may modify this as long as room names and connections are maintained.
-        out: house - the house to populate with rooms. Assumes house has been initialized.
-*/
-void populateRooms(HouseType* house) {
-    // First, create each room
+    // Creating a linked list of rooms
+    RoomNodeType* van_node = calloc(1, sizeof(RoomNodeType));
+    van_node->room = van;
+    van_node->nextNode = NULL;
 
-    // createRoom assumes that we dynamically allocate a room, initializes the values, and returns a RoomType*
-    // create functions are pretty typical, but it means errors are harder to return aside from NULL
-    struct Room* van                = createRoom("Van");
-    struct Room* hallway            = createRoom("Hallway");
-    struct Room* master_bedroom     = createRoom("Master Bedroom");
-    struct Room* boys_bedroom       = createRoom("Boy's Bedroom");
-    struct Room* bathroom           = createRoom("Bathroom");
-    struct Room* basement           = createRoom("Basement");
-    struct Room* basement_hallway   = createRoom("Basement Hallway");
-    struct Room* right_storage_room = createRoom("Right Storage Room");
-    struct Room* left_storage_room  = createRoom("Left Storage Room");
-    struct Room* kitchen            = createRoom("Kitchen");
-    struct Room* living_room        = createRoom("Living Room");
-    struct Room* garage             = createRoom("Garage");
-    struct Room* utility_room       = createRoom("Utility Room");
+    RoomNodeType* hallway_node = calloc(1, sizeof(RoomNodeType));
+    hallway_node->room = hallway;
+    hallway_node->nextNode = NULL;
 
-    // This adds each room to each other's room lists
-    // All rooms are two-way connections
+    RoomNodeType* master_bedroom_node = calloc(1, sizeof(RoomNodeType));
+    master_bedroom_node->room = master_bedroom;
+    master_bedroom_node->nextNode = NULL;
+
+    RoomNodeType* boys_bedroom_node = calloc(1, sizeof(RoomNodeType));
+    boys_bedroom_node->room = boys_bedroom;
+    boys_bedroom_node->nextNode = NULL;
+
+    RoomNodeType* bathroom_node = calloc(1, sizeof(RoomNodeType));
+    bathroom_node->room = bathroom;
+    bathroom_node->nextNode = NULL;
+
+    RoomNodeType* basement_node = calloc(1, sizeof(RoomNodeType));
+    basement_node->room = basement;
+    basement_node->nextNode = NULL;
+
+    RoomNodeType* basement_hallway_node = calloc(1, sizeof(RoomNodeType));
+    basement_hallway_node->room = basement_hallway;
+    basement_hallway_node->nextNode = NULL;
+
+    RoomNodeType* right_storage_room_node = calloc(1, sizeof(RoomNodeType));
+    right_storage_room_node->room = right_storage_room;
+    right_storage_room_node->nextNode = NULL;
+
+    RoomNodeType* left_storage_room_node = calloc(1, sizeof(RoomNodeType));
+    left_storage_room_node->room = left_storage_room;
+    left_storage_room_node->nextNode = NULL;
+
+    RoomNodeType* kitchen_node = calloc(1, sizeof(RoomNodeType));
+    kitchen_node->room = kitchen;
+    kitchen_node->nextNode = NULL;
+
+    RoomNodeType* living_room_node = calloc(1, sizeof(RoomNodeType));
+    living_room_node->room = living_room;
+    living_room_node->nextNode = NULL;
+
+    RoomNodeType* garage_node = calloc(1, sizeof(RoomNodeType));
+    garage_node->room = garage;
+    garage_node->nextNode = NULL;
+
+    RoomNodeType* utility_room_node = calloc(1, sizeof(RoomNodeType));
+    utility_room_node->room = utility_room;
+    utility_room_node->nextNode = NULL;
+
+    // initializing the room list
+    initRoomList(&building->rooms);
+    
+    // adding the rooms
+    addRoom(&building->rooms, van_node);
+    addRoom(&building->rooms, hallway_node);
+    addRoom(&building->rooms, master_bedroom_node);
+    addRoom(&building->rooms, boys_bedroom_node);
+    addRoom(&building->rooms, bathroom_node);
+    addRoom(&building->rooms, basement_node);
+    addRoom(&building->rooms, basement_hallway_node);
+    addRoom(&building->rooms, right_storage_room_node);
+    addRoom(&building->rooms, left_storage_room_node);
+    addRoom(&building->rooms, kitchen_node);
+    addRoom(&building->rooms, living_room_node);
+    addRoom(&building->rooms, garage_node);
+    addRoom(&building->rooms, utility_room_node);
+
+    // connecting the rooms together
     connectRooms(van, hallway);
     connectRooms(hallway, master_bedroom);
     connectRooms(hallway, boys_bedroom);
@@ -124,19 +137,14 @@ void populateRooms(HouseType* house) {
     connectRooms(kitchen, living_room);
     connectRooms(kitchen, garage);
     connectRooms(garage, utility_room);
+}
 
-    // Add each room to the house's room list
-    addRoom(&house->rooms, van);
-    addRoom(&house->rooms, hallway);
-    addRoom(&house->rooms, master_bedroom);
-    addRoom(&house->rooms, boys_bedroom);
-    addRoom(&house->rooms, bathroom);
-    addRoom(&house->rooms, basement);
-    addRoom(&house->rooms, basement_hallway);
-    addRoom(&house->rooms, right_storage_room);
-    addRoom(&house->rooms, left_storage_room);
-    addRoom(&house->rooms, kitchen);
-    addRoom(&house->rooms, living_room);
-    addRoom(&house->rooms, garage);
-    addRoom(&house->rooms, utility_room);
+void initBuilding(BuildingType* building)
+{
+  
+}
+
+void cleanupBuilding(BuildingType* building)
+{
+ 
 }
